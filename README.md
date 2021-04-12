@@ -17,5 +17,5 @@ cd serverDNS
 ```
 
 ## License
-[GNU v3](https://choosealicense.com/licenses/gpl-3.0/)
+[GPL v3](https://choosealicense.com/licenses/gpl-3.0/)
  
