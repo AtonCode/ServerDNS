@@ -42,6 +42,7 @@ int main(){
 
   if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
     
+    
   }
 
 
