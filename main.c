@@ -53,7 +53,7 @@ int main(){
     write(1,"Datagram: ",30);
     write(1,buffer,n);
     n=sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr*)&fromClient, fromClientLength);
-    if (n < 0){printError("RecFromCLiente");}
+    if (n < 0){printError("SendToCLiente");}
   }
   
 
