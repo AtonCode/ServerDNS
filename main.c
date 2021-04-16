@@ -41,14 +41,11 @@ int main(){
   server.sin_port = htons(53);
 
   if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
-    
-    
+    printError("Binding");
   }
 
+  fromClientLength = sizeof(sockaddr_in);
 
-
-
-  
 }
 
 void printError(char *messageError){
