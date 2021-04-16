@@ -22,7 +22,7 @@ void printError(char *messageError);
 
 int main(){
 
-  int udpSocket, serverLength, fromClientLength, i;
+  int udpSocket, serverLength, fromClientLength, n;
   struct sockaddr_in server, fromClient;
   struct sockaddr_storage serverStorage;
   socklen_t addr_size, client_addr_size;
@@ -45,6 +45,17 @@ int main(){
   }
 
   fromClientLength = sizeof(struct sockaddr_in);
+
+  while (1){
+    n = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&fromClient,&fromClientLength);
+
+    if(n<0){printError("RecFromCLiente");}
+    write(1,"Datagram: ",30);
+    write(1,buffer,n);
+    n=sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr*)&fromClient, fromClientLength);
+    if (n < 0){error("RecFromCLiente");}
+  }
+  
 
 }
 
