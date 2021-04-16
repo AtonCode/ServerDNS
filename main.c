@@ -44,7 +44,7 @@ int main(){
     printError("Binding");
   }
 
-  fromClientLength = sizeof(sockaddr_in);
+  fromClientLength = sizeof(struct sockaddr_in);
 
 }
 
