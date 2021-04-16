@@ -38,7 +38,7 @@ int main(){
   /*Configuration Server*/
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(53);
+  server.sin_port = htons(4457);
 
   if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
     printError("Binding");
@@ -51,8 +51,8 @@ int main(){
     if(n<0){printError("RecFromCLiente");}
 
     printf("Datagram:\n");
-    printf(buffer);
-    
+    /*printf(buffer);*/
+
     n=sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr*)&fromClient, fromClientLength);
     if (n < 0){printError("SendToCLiente");}
   }
