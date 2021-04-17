@@ -8,7 +8,7 @@ Fecha de Entrega: 2/5/2021
 
 /************* DNS SERVER CODE *******************/
 /************* UDP SERVER CODE *******************/
-
+/*buenas*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
