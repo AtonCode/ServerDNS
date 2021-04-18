@@ -18,13 +18,13 @@ Fecha de Entrega: 2/5/2021
 #include <sys/types.h>
 #include <netinet/in.h>
 
-void printError(char *messageError);
-void respondQuery(char data);
+void printError(char *messageError); // Funcion de error
+void respondQuery(char data); // Manejo de datos del Datagrama
 
 int main(){
 
-  int udpSocket, serverLength, fromClientLength, dataGram;
-  struct sockaddr_in server, fromClient;
+  int udpSocket, serverLength, fromClientLength, dataGram; // Variables auxiliales
+  struct sockaddr_in server, fromClient; // Sockets for server and client
   char buffer[512]; // UDP messages 512 octets or less
   
   /*Create UDP socket*/
@@ -36,12 +36,12 @@ int main(){
 
   /*Configuration Server*/
 
-  server.sin_family = AF_INET;
-  server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(53);
+  server.sin_family = AF_INET; // IP v4
+  server.sin_addr.s_addr = INADDR_ANY; // 127.0.0.1
+  server.sin_port = htons(53); //Puerto 53
 
 
-  if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
+  if(bind(udpSocket, (struct sockaddr *)&server, serverLength) < 0){
     printError("Binding");
   }
 
