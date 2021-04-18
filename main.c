@@ -38,7 +38,7 @@ int main(){
   /*Configuration Server*/
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
-  server.sin_port = htons(4457);
+  server.sin_port = htons(53);
 
   if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
     printError("Binding");
