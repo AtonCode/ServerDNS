@@ -67,4 +67,11 @@ void printError(char *messageError){
 
 void respondQuery(char data){
 
+  //Get the transaction ID
+
+  //Get the Flags
+
+  //
+  
+
 }
