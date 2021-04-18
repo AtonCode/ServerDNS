@@ -49,7 +49,7 @@ int main(){
 
   while (1){
     dataGram = recvfrom(udpSocket,buffer,512,0,(struct sockaddr *) &fromClient, &fromClientLength);
-    if(dataGram<0){ printError(" ReciviendoDatagramCLiente");}
+    if(dataGram<0){ printError(" RecibiendoDatagramCLiente");}
 
     printf("Datagram del Cliente:\n");
     /*printf(buffer);*/
