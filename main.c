@@ -38,7 +38,7 @@ int main(){
 
   server.sin_family = AF_INET; // IP v4
   server.sin_port = htons(53); //Puerto 53
-  server.sin_addr.s_addr = inet_addr('127.0.0.1'); // 127.0.0.1
+  server.sin_addr.s_addr = INADDR_ANY; // 127.0.0.1
   
 
 
