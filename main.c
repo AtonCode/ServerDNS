@@ -19,14 +19,13 @@ Fecha de Entrega: 2/5/2021
 #include <netinet/in.h>
 
 void printError(char *messageError);
+void respondQuery(char data);
 
 int main(){
 
-  int udpSocket, serverLength, fromClientLength, n;
+  int udpSocket, serverLength, fromClientLength, dataGram;
   struct sockaddr_in server, fromClient;
-  struct sockaddr_storage serverStorage;
-  socklen_t addr_size, client_addr_size;
-  char buffer[1024];
+  char buffer[512]; // UDP messages 512 octets or less
   
   /*Create UDP socket*/
   udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -36,9 +35,11 @@ int main(){
   bzero(&server, serverLength);
 
   /*Configuration Server*/
+
   server.sin_family = AF_INET;
   server.sin_addr.s_addr = INADDR_ANY;
   server.sin_port = htons(53);
+
 
   if(bind(udpSocket, (struct sockaddr * )&server, serverLength) < 0){
     printError("Binding");
@@ -47,20 +48,32 @@ int main(){
   fromClientLength = sizeof(struct sockaddr_in);
 
   while (1){
-    n = recvfrom(udpSocket,buffer,1024,0,(struct sockaddr *)&fromClient,&fromClientLength);
-    if(n<0){printError("RecFromCLiente");}
+    dataGram = recvfrom(udpSocket,buffer,512,0,(struct sockaddr *) &fromClient, &fromClientLength);
+    if(dataGram<0){ printError(" ReciviendoDatagramCLiente");}
 
-    printf("Datagram:\n");
+    printf("Datagram del Cliente:\n");
     /*printf(buffer);*/
+    write(1,buffer,dataGram);
 
-    n=sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr*)&fromClient, fromClientLength);
-    if (n < 0){printError("SendToCLiente");}
+    //Funcion DNS QueryResponds
+
+    dataGram = sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr *) &fromClient, fromClientLength);
+    if (dataGram < 0){ printError(" EnviandoQueryRespond");}
   }
-  
-
 }
 
 void printError(char *messageError){
       perror(messageError);
       exit(0);
-  }
+}
+
+void respondQuery(char data){
+
+  //Get the transaction ID
+
+  //Get the Flags
+
+  //
+  
+
+}
