@@ -182,7 +182,7 @@ while 1:
     dataGram1, addrCliente = sock.recvfrom(SIZE)
 
     # 2 Procesando datagrama y construyedo el queryRespond
-    #queryRespond = queryResponse(dataGram)
+    queryRespond = queryResponse(dataGram1)
     print("Query Recibido Cliente ")
     print(addrCliente)
     print(dataGram1)
@@ -190,21 +190,6 @@ while 1:
    
     
     # 3 Enviando el query Responds al mismo cliente
-    #sock.sendto(queryRespond, addrCliente)
+    sock.sendto(queryRespond, addrCliente)
 
-    # Servidor DNS Amigo
-    sock.sendto(dataGram1,serverDNSAddressPort) # Envia Datargrama a 208.67.220.220:53
-    print("Query Enviado DNS AMIGO ")
-    print(serverDNSAddressPort)
-    print(" ")
-
-    dataGram2, serverDNSAddressPort = sock.recvfrom(SIZE)
-    print("Query Resibido DNS AMIGO ")
-    print(dataGram2)
-    print(" ")
-    queryRespond = queryResponse(dataGram1)
-
-    sock.sendto(queryRespond,addrCliente)
-
-    print("QueryRespond Enviado ")
-    print(addrCliente)
+   
