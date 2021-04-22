@@ -4,7 +4,7 @@ import socket, glob, json
 LocalHost = '127.0.0.1'
 OpenDNS = '208.67.220.220'
 DNSPort = 53
-SIZE = 1024 # Mensajes UDP de 512 octetos or lees
+SIZE = 512 # Mensajes UDP de 512 octetos or lees
 
 # Creando y Configurando Servidor UDP
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -15,7 +15,7 @@ serverDNSAddressPort = (OpenDNS, DNSPort)
 
 
 # Funcion que carga al sistema de la carpeta zonas todos los archivos .zone
-def load_zones():
+def cargaZonas():
 
     jsonzone = {}
     zonefiles = glob.glob('zones/*.zone')
@@ -27,7 +27,7 @@ def load_zones():
             jsonzone[zonename] = data
     return jsonzone
 
-def getflags(flags):
+def getFlags(flags):
 
     byte1 = bytes(flags[:1])
     byte2 = bytes(flags[1:2])
@@ -37,7 +37,7 @@ def getflags(flags):
 
     OPCODE = ''
     for bit in range(1,5):
-        OPCODE += str(ord(byte1)&(1<<bit))
+        OPCODE += str(ord(byte1) & (1<<bit))
 
     AA = '1'
     TC = '0'
@@ -50,7 +50,7 @@ def getflags(flags):
 
     return int(QR+OPCODE+AA+TC+RD, 2).to_bytes(1, byteorder='big')+int(RA+Z+RCODE, 2).to_bytes(1, byteorder='big')
 
-def getquestiondomain(data):
+def getQuestionDomain(data):
 
     state = 0
     expectedlength = 0
@@ -81,7 +81,7 @@ def getquestiondomain(data):
     return (domainparts, questiontype)
 
 # Se Carga las Zonas
-zonedata = load_zones()
+zonedata = cargaZonas()
 
 def getzone(domain):
     global zonedata
@@ -90,7 +90,7 @@ def getzone(domain):
     return zonedata[zone_name]
 
 def getrecs(data):
-    domain, questiontype = getquestiondomain(data)
+    domain, questiontype = getQuestionDomain(data)
     qt = ''
     if questiontype == b'\x00\x01':
         qt = 'a'
@@ -137,17 +137,17 @@ def rectobytes(domainname, rectype, recttl, recval):
 # Funcion que resive el datagrama del cliente y construye el queryRespond
 def queryResponse(dataGram):
 
-    # Transaction ID
+    # Get Transaction ID
     transactionID = dataGram[:2]
     # Get the flags
-    flags = getflags(dataGram[2:4])
-    # Question Count
+    flags = getFlags(dataGram[2:4])
+    # Get Question Count
     QDcount = b'\x00\x01'
-    # Answer Count
+    # Get Answer Count
     ANScount = len(getrecs(dataGram[12:])[0]).to_bytes(2, byteorder='big')
-    # NameServer Count
+    # Get NameServer Count
     NScount = (0).to_bytes(2, byteorder='big')
-    # Additonal Count
+    # Get Additonal Count
     ADDcount = (0).to_bytes(2, byteorder='big')
 
     # Construyendo el QueryRespond
@@ -188,8 +188,11 @@ while 1:
     print(dataGram1)
     print(" ")
    
-    
     # 3 Enviando el query Responds al mismo cliente
     sock.sendto(queryRespond, addrCliente)
+    print("Query Enviado Cliente ")
+    print(queryRespond)
+    print("Fin")
+    print("-----------------------")
 
    
