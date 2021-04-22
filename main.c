@@ -12,54 +12,76 @@ Fecha de Entrega: 2/5/2021
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 
+#define portDNS 53
+#define UDPmessagesSize 512
+
 void printError(char *messageError); // Funcion de error
 void respondQuery(char data); // Manejo de datos del Datagrama
 
 int main(){
 
-  int udpSocket, serverLength, fromClientLength, dataGram; // Variables auxiliales
-  struct sockaddr_in server, fromClient; // Sockets for server and client
-  char buffer[512]; // UDP messages 512 octets or less
+  int udpSocket, n; // Variables auxiliales
+  socklen_t fromClientLength, serverLength;
+  struct sockaddr_in serverAddr, fromClientAddr; // Sockets for server and client
+  struct hostent *hostClient; // host del cliente que envia mensajes
+  char *hostaddrp;	/* dotted decimal host addr string */
+  char *DataGramUDP; // UDP messages 512 octets or less
   
   /*Create UDP socket*/
   udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
   if(udpSocket < 0){printError("Opening Socket");}
 
-  serverLength = sizeof(server);
-  bzero(&server, serverLength);
+  serverLength = sizeof(serverAddr);
+  bzero((char *)&serverAddr, sizeof(serverAddr));
 
   /*Configuration Server*/
 
-  server.sin_family = AF_INET; // IP v4
-  server.sin_port = htons(53); //Puerto 53
-  server.sin_addr.s_addr = INADDR_ANY; // 127.0.0.1
+  serverAddr.sin_family = AF_INET; // IP v4
+  serverAddr.sin_port = htons(53); //Puerto 53
+  serverAddr.sin_addr.s_addr = htonl(INADDR_ANY); // 127.0.0.1
   
 
-
-  if(bind(udpSocket, (struct sockaddr *)&server, serverLength) < 0){
-    printError("Binding");
+  if(bind(udpSocket, (struct sockaddr *)&serverAddr, serverLength) < 0){
+    printError("Binding Error");
   }
 
-  fromClientLength = sizeof(struct sockaddr_in);
+  fromClientLength = sizeof(fromClientAddr);
 
+  DataGramUDP = malloc(UDPmessagesSize);
   while (1){
-    dataGram = recvfrom(udpSocket,buffer,512,0,(struct sockaddr *) &fromClient, &fromClientLength);
-    if(dataGram<0){ printError(" RecibiendoDatagramCLiente");}
 
+    n = recvfrom(udpSocket,DataGramUDP,sizeof(DataGramUDP),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
+    if(n<0){ printError(" RecibiendoDatagramCLiente");}
+
+    /*//who sent the datagram
+		hostClient = gethostbyaddr((const char *)&fromClientAddr.sin_addr.s_addr,sizeof(fromClientAddr.sin_addr.s_addr),AF_INET);
+
+		if (hostClient == NULL){printError("ERROR on gethostbyaddr");}
+		hostaddrp = inet_ntoa(fromClientAddr.sin_addr);
+
+		if (hostaddrp == NULL){
+      printError("ERROR on inet_ntoa\n");
+		  printf("server received %d bytes\n", n);
+    }*/
+			
     printf("Datagram del Cliente:\n");
-    /*printf(buffer);*/
-    //write(1,buffer,dataGram);
+    write(1,"Datagram: ",30);
+    write(1,DataGramUDP,n);
+    
 
     //Funcion DNS QueryResponds
 
-    dataGram = sendto(udpSocket,"Recived Your DataGram\n",22,0,(struct sockaddr *) &fromClient, fromClientLength);
-    if (dataGram < 0){ printError(" EnviandoQueryRespond");}
+
+
+    n  = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
+    if (n  < 0){ printError(" EnviandoQueryRespond");}
   }
 }
 

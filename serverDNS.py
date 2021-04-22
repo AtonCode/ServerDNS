@@ -1,11 +1,20 @@
 import socket, glob, json
 
-port = 53
-ip = '127.0.0.1'
+# Estandar DNS
+LocalHost = '127.0.0.1'
+OpenDNS = '208.67.220.220'
+DNSPort = 53
+SIZE = 1024 # Mensajes UDP de 512 octetos or lees
 
+# Creando y Configurando Servidor UDP
 sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-sock.bind((ip, port))
+sock.bind((LocalHost, DNSPort))
 
+# Servidor DNS Amigo
+serverDNSAddressPort = (OpenDNS, DNSPort)
+
+
+# Funcion que carga al sistema de la carpeta zonas todos los archivos .zone
 def load_zones():
 
     jsonzone = {}
@@ -18,15 +27,12 @@ def load_zones():
             jsonzone[zonename] = data
     return jsonzone
 
-zonedata = load_zones()
-
 def getflags(flags):
 
     byte1 = bytes(flags[:1])
     byte2 = bytes(flags[1:2])
 
     rflags = ''
-
     QR = '1'
 
     OPCODE = ''
@@ -34,17 +40,12 @@ def getflags(flags):
         OPCODE += str(ord(byte1)&(1<<bit))
 
     AA = '1'
-
     TC = '0'
-
     RD = '0'
 
     # Byte 2
-
     RA = '0'
-
     Z = '000'
-
     RCODE = '0000'
 
     return int(QR+OPCODE+AA+TC+RD, 2).to_bytes(1, byteorder='big')+int(RA+Z+RCODE, 2).to_bytes(1, byteorder='big')
@@ -78,6 +79,9 @@ def getquestiondomain(data):
     questiontype = data[y:y+2]
 
     return (domainparts, questiontype)
+
+# Se Carga las Zonas
+zonedata = load_zones()
 
 def getzone(domain):
     global zonedata
@@ -130,46 +134,77 @@ def rectobytes(domainname, rectype, recttl, recval):
             rbytes += bytes([int(part)])
     return rbytes
 
-def buildresponse(data):
+# Funcion que resive el datagrama del cliente y construye el queryRespond
+def queryResponse(dataGram):
 
     # Transaction ID
-    TransactionID = data[:2]
-
+    transactionID = dataGram[:2]
     # Get the flags
-    Flags = getflags(data[2:4])
-
+    flags = getflags(dataGram[2:4])
     # Question Count
-    QDCOUNT = b'\x00\x01'
-
+    QDcount = b'\x00\x01'
     # Answer Count
-    ANCOUNT = len(getrecs(data[12:])[0]).to_bytes(2, byteorder='big')
-
-    # Nameserver Count
-    NSCOUNT = (0).to_bytes(2, byteorder='big')
-
+    ANScount = len(getrecs(dataGram[12:])[0]).to_bytes(2, byteorder='big')
+    # NameServer Count
+    NScount = (0).to_bytes(2, byteorder='big')
     # Additonal Count
-    ARCOUNT = (0).to_bytes(2, byteorder='big')
+    ADDcount = (0).to_bytes(2, byteorder='big')
 
-    dnsheader = TransactionID+Flags+QDCOUNT+ANCOUNT+NSCOUNT+ARCOUNT
+    # Construyendo el QueryRespond
+    # DNS Header
+    DNSheader = transactionID + flags + QDcount  + ANScount + NScount + ADDcount
+    # DNS body
+    DNSbody = b''
 
-    # Create DNS body
-    dnsbody = b''
+    # Resolviendo el Query y extrayendo el dominio y si ip
+    records, recType, domainName = getrecs(dataGram[12:])
+    DNSquestion = buildquestion(domainName, recType)
 
-    # Get answer for query
-    records, rectype, domainname = getrecs(data[12:])
+    # Si el dominio preguntado por el cliente no se encuentra en el archivo zona
+    # Se procede a enviar el datagrama a un servidor DNS amigo para que lo resuelva
+    # y nos envie el queryRespond al cual se le extraen los datos y se copia en nuestra
+    # carpeta de zona y se envia ese QueryRespond intacto al Cliente.
 
-    dnsquestion = buildquestion(domainname, rectype)
+    # Falta trabajar en eso y eso tendria que ir en este espacio antes de retornar un error
 
+    # Uniendo la respuesta de resolucion de dominio a la estructura QueryRespound
     for record in records:
-        dnsbody += rectobytes(domainname, rectype, record["ttl"], record["value"])
+        DNSbody += rectobytes(domainName, recType, record["ttl"], record["value"])
 
-    return dnsheader + dnsquestion + dnsbody
+    return DNSheader + DNSquestion + DNSbody
 
 
+# Main
+# Bucle infinito del Servidor DNS
 while 1:
-    data, addr = sock.recvfrom(512)
-    r = buildresponse(data)
-    print("Query Recibido ")
-    sock.sendto(r, addr)
-    print("Query Enviado ")
+    
+    # 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
+    dataGram1, addrCliente = sock.recvfrom(SIZE)
+
+    # 2 Procesando datagrama y construyedo el queryRespond
+    #queryRespond = queryResponse(dataGram)
+    print("Query Recibido Cliente ")
+    print(addrCliente)
+    print(dataGram1)
     print(" ")
+   
+    
+    # 3 Enviando el query Responds al mismo cliente
+    #sock.sendto(queryRespond, addrCliente)
+
+    # Servidor DNS Amigo
+    sock.sendto(dataGram1,serverDNSAddressPort) # Envia Datargrama a 208.67.220.220:53
+    print("Query Enviado DNS AMIGO ")
+    print(serverDNSAddressPort)
+    print(" ")
+
+    dataGram2, serverDNSAddressPort = sock.recvfrom(SIZE)
+    print("Query Resibido DNS AMIGO ")
+    print(dataGram2)
+    print(" ")
+    queryRespond = queryResponse(dataGram1)
+
+    sock.sendto(queryRespond,addrCliente)
+
+    print("QueryRespond Enviado ")
+    print(addrCliente)
