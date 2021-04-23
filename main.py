@@ -173,7 +173,7 @@ def queryResponse(dataGram):
 
     return DNSheader + DNSquestion + DNSbody
   
-  
+
 # Main
 # Bucle infinito del Servidor DNS
 try:
@@ -195,9 +195,10 @@ try:
         print(addrCliente)
         print(queryRespond)
         print(" ")
-        print("------------------------ . . .")
+        print("---------------------------")
         print("Esperando mas Datagramas...")
-        print("------------------------ . . .")
+        print("---------------------------")
+        print(":)")
         print(" ")
         
 except KeyError:
