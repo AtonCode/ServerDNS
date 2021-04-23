@@ -10,6 +10,7 @@ Fecha de Entrega: 2/5/2021
 /************* UDP SERVER CODE *******************/
 
 #include <stdio.h>
+#include <iostream>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -18,6 +19,7 @@ Fecha de Entrega: 2/5/2021
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
+
 
 #define portDNS 53
 #define UDPmessagesSize 512
@@ -53,7 +55,7 @@ int main(){
   }
 
   fromClientLength = sizeof(fromClientAddr);
-  DataGramUDP = malloc(UDPmessagesSize);
+  DataGramUDP;
 
   while (1){
 
@@ -63,7 +65,7 @@ int main(){
     printf("Datagram del Cliente:\n");
     
     for(int i = 0; i < 513; i){
-      printf(DataGramUDP[i]);
+      std::cout<<DataGramUDP[i];
 
     }
 
