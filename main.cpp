@@ -11,29 +11,32 @@ Fecha de Entrega: 2/5/2021
 
 #include <stdio.h>
 #include <iostream>
+#include <cstring>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <errno.h>
 
 #include <netdb.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <netinet/in.h>
 
+using namespace std;
 
 #define portDNS 53
 #define UDPmessagesSize 512
 
 void respondQuery(char* data); // Manejo de datos del Datagrama
 
-char* servidorUDP(){
+void servidorUDP(){
 
-  int udpSocket, n; // Variables auxiliales
+  int udpSocket, nbytes; // Variables auxiliales
   socklen_t fromClientLength, serverLength;
   struct sockaddr_in serverAddr, fromClientAddr; // Sockets for server and client
   struct hostent *hostClient; // host del cliente que envia mensajes
   char *hostaddrp;	/* dotted decimal host addr string */
-  char *DataGramUDP; // UDP messages 512 octets or less
+  char buffer[UDPmessagesSize]; // UDP messages 512 octets or less
   
   /*Create UDP socket*/
   udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
@@ -54,32 +57,31 @@ char* servidorUDP(){
   }
 
   fromClientLength = sizeof(fromClientAddr);
-  DataGramUDP = new char[UDPmessagesSize];
-
   
-  while (1){
+  while (true){
 
-    n = recvfrom(udpSocket,DataGramUDP,sizeof(DataGramUDP),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
-    if(n<0){ std::cout<<" No RecibiendoDatagramCLiente";}
+    nbytes = recvfrom(udpSocket,buffer,sizeof(buffer),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
+    if(nbytes < 0){ std::cout<<" No RecibiendoDatagramCLiente";}
 
     std::cout<<"Datagram del Cliente:\n";
-    for(int i = 0; i < 513; i){std::cout<<DataGramUDP[i];}
+
+    write(1,buffer,sizeof(buffer));
 
     //Funcion DNS QueryResponds
+    
 
 
 
-    n = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
-    if (n  < 0){ std::cout<<"No EnviandoQueryRespond\n";}
+    nbytes = sendto(udpSocket, buffer, nbytes, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
+    if (nbytes < 0){ std::cout<<"No EnviandoQueryRespond\n";}
   }
-  return DataGramUDP;
+
 }
+
 
 int main(){
 
-  char* DataGramUDP;
-
-  DataGramUDP = servidorUDP();
+  servidorUDP();
 
   return 1;
 }

@@ -172,24 +172,76 @@ def queryResponse(dataGram):
         DNSbody += construyendoDNSbody(domainName, recType, record["ttl"], record["value"])
 
     return DNSheader + DNSquestion + DNSbody
+
+def getrecsDNSamigo(data):
+    domain, questiontype = getQuestionDomain(data)
+    qt = ''
+    if questiontype == b'\x00\x01':
+        qt = 'a'
+    return (qt, domain)
+
+def queryResponseDNSamigo(dataGram):
+
+    # Get Transaction ID
+    transactionID = dataGram[:2]
+    # Get the flags
+    flags = getFlags(dataGram[2:4])
+    # Get Question Count
+    QDcount = b'\x00\x01'
+    # Get Answer Count
+    ANScount = len(getrecs(dataGram[12:])[0]).to_bytes(2, byteorder='big')
+    # Get NameServer Count
+    NScount = (0).to_bytes(2, byteorder='big')
+    # Get Additonal Count
+    ADDcount = (0).to_bytes(2, byteorder='big')
+
+    # Construyendo el QueryRespond para enviar al cliente
+    # DNS Header
+    DNSheader = transactionID + flags + QDcount  + ANScount + NScount + ADDcount
+    # DNS body
+    DNSbody = b''
+
+    # Resolviendo el Query y extrayendo el dominio y si ip
+    recType, domainName = getrecsDNSamigo(dataGram[12:])
+    DNSquestion = questionDNS(domainName, recType)
+
+    #for record in records:
+        #DNSbody += construyendoDNSbody(domainName, recType, record["ttl"], record["value"])
+
+    return DNSheader + DNSquestion + DNSbody
   
 
 # Main
-# Bucle infinito del Servidor DNS
+# Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
+def clienteUDPaskToDNS(dataGramFromFriendDNS, serverDNSAddressPort):
+    
+# Create a UDP socket at client side
+    UDPClientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+# Send to server using created UDP socket
+    UDPClientSocket.sendto(dataGramFromFriendDNS, serverDNSAddressPort)
+    queryRespondDNSFriend, addrDNSfriend = UDPClientSocket.recvfrom(512)
+    
+    return queryRespondDNSFriend
+
+# Servidor DNS
 try:
-    while 1:
+    while True:
 
     # 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
         dataGram1, addrCliente = udpService.recvfrom(SIZE)
 
     # 2 Procesando datagrama y construyedo el queryRespond
         queryRespond = queryResponse(dataGram1)
+        #queryRespond = clienteUDPaskToDNS(dataGram1, serverDNSAddressPort)
+        
         print("Query Recibido Cliente ")
         print(addrCliente)
         print(dataGram1)
         print(" ")
    
     # 3 Enviando el query Responds al mismo cliente
+        print(queryRespond)
         udpService.sendto(queryRespond, addrCliente)
         print("Query Enviado Cliente ")
         print(addrCliente)
@@ -206,7 +258,9 @@ except KeyError:
     print("Enviando Datagrama a OpenDNS...")
     print(":)")
     print(" ")
-    
+    queryRespond = clienteUDPaskToDNS(dataGram1, serverDNSAddressPort)
+    udpService.sendto(queryRespond, addrCliente)
+    udpService.close()
 
 except KeyboardInterrupt:
     print(" ")
