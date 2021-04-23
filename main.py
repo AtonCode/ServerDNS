@@ -204,6 +204,7 @@ try:
 except KeyError:
     print(" ")
     print("Enviando Datagrama a OpenDNS...")
+    print(":)")
     print(" ")
     
 
@@ -211,5 +212,6 @@ except KeyboardInterrupt:
     print(" ")
     print(" ")
     print(' Adios Amigo Que la Fuerza te Acompañe...')
+    print(" :)")
     print(" ")
     udpService.close()
