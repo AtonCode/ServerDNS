@@ -24,9 +24,10 @@ Fecha de Entrega: 2/5/2021
 #define portDNS 53
 #define UDPmessagesSize 512
 
+void printError( char* messageError); // Funcion de error
 void respondQuery(char* data); // Manejo de datos del Datagrama
 
-void servidorUDP(){
+int main(){
 
   int udpSocket, n; // Variables auxiliales
   socklen_t fromClientLength, serverLength;
@@ -56,28 +57,35 @@ void servidorUDP(){
   fromClientLength = sizeof(fromClientAddr);
   DataGramUDP = new char[UDPmessagesSize];
 
-  
   while (1){
 
     n = recvfrom(udpSocket,DataGramUDP,sizeof(DataGramUDP),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
-    if(n<0){ std::cout<<" No RecibiendoDatagramCLiente";}
+    if(n<0){ std::cout<<" RecibiendoDatagramCLiente";}
 
     std::cout<<"Datagram del Cliente:\n";
-    for(int i = 0; i < 513; i){std::cout<<DataGramUDP[i];}
+    
+    for(int i = 0; i < 513; i){
+      std::cout<<DataGramUDP[i];
+
+    }
 
     //Funcion DNS QueryResponds
 
 
 
-    n = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
-    if (n  < 0){ std::cout<<"No EnviandoQueryRespond\n";}
+    n  = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
+    if (n  < 0){ std::cout<<"EnviandoQueryRespond\n";}
   }
-
 }
 
-int main(){
 
-  servidorUDP();
+void respondQuery(char* data){
+
+  //Get the transaction ID
+
+  //Get the Flags
+
+  //
   
-  return 1;
+
 }
