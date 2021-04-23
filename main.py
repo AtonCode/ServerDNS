@@ -1,3 +1,12 @@
+'''
+Licencia GPL v3
+Autores: Alejandro Sacristan Leal & Camilo Jose Narvaez Montenegro & Loui Gerald Quintero & Juan Pablo Urrego
+Materia: Comunicación y Redes
+Desarrollo: Servidor DNS
+Fecha de Entrega: 2/5/2021
+
+'''
+
 import socket, glob, json
 
 # Estandar DNS
@@ -12,8 +21,9 @@ udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
 
+
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
-def clienteUDPaskToDNS(dataGramFromFriendDNS, serverDNSAddressPort):
+def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     
 # Creando Nuevo UDP Socket
     UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -35,7 +45,7 @@ try:
         dataGram1, addrCliente = udpServerSocket.recvfrom(SIZE)
 
     # 2 Enviando Datagrama a OpenDns y Resiviendo la respuesta
-        queryRespond = clienteUDPaskToDNS(dataGram1, serverDNSAddressPort)
+        queryRespond = foreingResolver(dataGram1, serverDNSAddressPort)
         
         print("Query Recibido Cliente ")
         print(addrCliente)
