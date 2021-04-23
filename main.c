@@ -62,7 +62,7 @@ int main(){
 
     printf("Datagram del Cliente:\n");
     
-    for(int i = 0; i<sizeof(DataGramUDP); i){
+    for(int i = 0; i < 513; i){
       printf(DataGramUDP[i]);
 
     }
