@@ -199,6 +199,7 @@ def queryResponse(dataGram):
 # Bucle infinito del Servidor DNS
 try:
     while 1:
+
     # 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
         dataGram1, addrCliente = udpService.recvfrom(SIZE)
 
@@ -214,10 +215,21 @@ try:
         print("Query Enviado Cliente ")
         print(addrCliente)
         print(queryRespond)
-        print("Fin")
-        print("-----------------------")
-
+        print(" ")
+        print("------------------------ . . .")
+        print("Esperando mas Datagramas...")
+        print("------------------------ . . .")
+        print(" ")
+        
+except KeyError:
+    print(" ")
+    print("Enviando Datagrama a OpenDNS...")
+    print(" ")
+    
 
 except KeyboardInterrupt:
-    print('Finalizando')
+    print(" ")
+    print(" ")
+    print(' Adios Amigo Que la Fuerza te Acompañe...')
+    print(" ")
     udpService.close()
