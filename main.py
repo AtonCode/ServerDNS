@@ -173,29 +173,8 @@ def queryResponse(dataGram):
 
     return DNSheader + DNSquestion + DNSbody
   
-'''
-# 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
-    dataGram1, addrCliente = sock.recvfrom(SIZE)
-
-    # 2 Procesando datagrama y construyedo el queryRespond
-    queryRespond = queryResponse(dataGram1)
-    print("Query Recibido Cliente ")
-    print(addrCliente)
-    print(dataGram1)
-    print(" ")
-   
-    # 3 Enviando el query Responds al mismo cliente
-    sock.sendto(queryRespond, addrCliente)
-    print("Query Enviado Cliente ")
-    print(addrCliente)
-    print(queryRespond)
-    print("Fin")
-    print("-----------------------")
-
-'''
-
+  
 # Main
-
 # Bucle infinito del Servidor DNS
 try:
     while 1:
