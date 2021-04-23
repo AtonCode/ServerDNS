@@ -24,7 +24,7 @@ Fecha de Entrega: 2/5/2021
 #define portDNS 53
 #define UDPmessagesSize 512
 
-void printError(char *messageError); // Funcion de error
+void printError( char* messageError); // Funcion de error
 void respondQuery(char data); // Manejo de datos del Datagrama
 
 int main(){
@@ -38,7 +38,7 @@ int main(){
   
   /*Create UDP socket*/
   udpSocket = socket(AF_INET, SOCK_DGRAM, 0);
-  if(udpSocket < 0){printError("Opening Socket");}
+  if(udpSocket < 0){std::cout<<"Opening Socket\n";}
 
   serverLength = sizeof(serverAddr);
   bzero((char *)&serverAddr, sizeof(serverAddr));
@@ -51,7 +51,7 @@ int main(){
   
 
   if(bind(udpSocket, (struct sockaddr *)&serverAddr, serverLength) < 0){
-    printError("Binding Error");
+    std::cout<<"Binding Error\n";
   }
 
   fromClientLength = sizeof(fromClientAddr);
@@ -60,9 +60,9 @@ int main(){
   while (1){
 
     n = recvfrom(udpSocket,DataGramUDP,sizeof(DataGramUDP),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
-    if(n<0){ printError(" RecibiendoDatagramCLiente");}
+    if(n<0){ std::cout<<" RecibiendoDatagramCLiente";}
 
-    printf("Datagram del Cliente:\n");
+    std::cout<<"Datagram del Cliente:\n";
     
     for(int i = 0; i < 513; i){
       std::cout<<DataGramUDP[i];
@@ -74,14 +74,10 @@ int main(){
 
 
     n  = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
-    if (n  < 0){ printError(" EnviandoQueryRespond");}
+    if (n  < 0){ std::cout<<"EnviandoQueryRespond\n";}
   }
 }
 
-void printError(char *messageError){
-      perror(messageError);
-      exit(0);
-}
 
 void respondQuery(char data){
 
