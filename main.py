@@ -232,8 +232,8 @@ try:
         dataGram1, addrCliente = udpService.recvfrom(SIZE)
 
     # 2 Procesando datagrama y construyedo el queryRespond
-        queryRespond = queryResponse(dataGram1)
-        #queryRespond = clienteUDPaskToDNS(dataGram1, serverDNSAddressPort)
+        #queryRespond = queryResponse(dataGram1)
+        queryRespond = clienteUDPaskToDNS(dataGram1, serverDNSAddressPort)
         
         print("Query Recibido Cliente ")
         print(addrCliente)
