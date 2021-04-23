@@ -26,7 +26,7 @@ Fecha de Entrega: 2/5/2021
 
 void respondQuery(char* data); // Manejo de datos del Datagrama
 
-void servidorUDP(){
+char* servidorUDP(){
 
   int udpSocket, n; // Variables auxiliales
   socklen_t fromClientLength, serverLength;
@@ -72,12 +72,14 @@ void servidorUDP(){
     n = sendto(udpSocket, DataGramUDP, n, 0,(struct sockaddr *)&fromClientAddr, fromClientLength);
     if (n  < 0){ std::cout<<"No EnviandoQueryRespond\n";}
   }
-
+  return DataGramUDP;
 }
 
 int main(){
 
-  servidorUDP();
-  
+  char* DataGramUDP;
+
+  DataGramUDP = servidorUDP();
+
   return 1;
 }
