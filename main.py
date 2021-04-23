@@ -99,7 +99,7 @@ def getrecs(data):
 
     return (zone[qt], qt, domain)
 
-def buildquestion(domainname, rectype):
+def questionDNS(domainname, rectype):
     qbytes = b''
 
     for part in domainname:
@@ -116,7 +116,7 @@ def buildquestion(domainname, rectype):
 
     return qbytes
 
-def rectobytes(domainname, rectype, recttl, recval):
+def construyendoDNSbody(domainname, rectype, recttl, recval):
 
     rbytes = b'\xc0\x0c'
 
@@ -150,7 +150,7 @@ def queryResponse(dataGram):
     # Get Additonal Count
     ADDcount = (0).to_bytes(2, byteorder='big')
 
-    # Construyendo el QueryRespond
+    # Construyendo el QueryRespond para enviar al cliente
     # DNS Header
     DNSheader = transactionID + flags + QDcount  + ANScount + NScount + ADDcount
     # DNS body
@@ -158,7 +158,7 @@ def queryResponse(dataGram):
 
     # Resolviendo el Query y extrayendo el dominio y si ip
     records, recType, domainName = getrecs(dataGram[12:])
-    DNSquestion = buildquestion(domainName, recType)
+    DNSquestion = questionDNS(domainName, recType)
 
     # Si el dominio preguntado por el cliente no se encuentra en el archivo zona
     # Se procede a enviar el datagrama a un servidor DNS amigo para que lo resuelva
@@ -169,7 +169,7 @@ def queryResponse(dataGram):
 
     # Uniendo la respuesta de resolucion de dominio a la estructura QueryRespound
     for record in records:
-        DNSbody += rectobytes(domainName, recType, record["ttl"], record["value"])
+        DNSbody += construyendoDNSbody(domainName, recType, record["ttl"], record["value"])
 
     return DNSheader + DNSquestion + DNSbody
   

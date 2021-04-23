@@ -53,28 +53,19 @@ int main(){
   }
 
   fromClientLength = sizeof(fromClientAddr);
-
   DataGramUDP = malloc(UDPmessagesSize);
+
   while (1){
 
     n = recvfrom(udpSocket,DataGramUDP,sizeof(DataGramUDP),0,(struct sockaddr *) &fromClientAddr, &fromClientLength);
     if(n<0){ printError(" RecibiendoDatagramCLiente");}
 
-    /*//who sent the datagram
-		hostClient = gethostbyaddr((const char *)&fromClientAddr.sin_addr.s_addr,sizeof(fromClientAddr.sin_addr.s_addr),AF_INET);
-
-		if (hostClient == NULL){printError("ERROR on gethostbyaddr");}
-		hostaddrp = inet_ntoa(fromClientAddr.sin_addr);
-
-		if (hostaddrp == NULL){
-      printError("ERROR on inet_ntoa\n");
-		  printf("server received %d bytes\n", n);
-    }*/
-			
     printf("Datagram del Cliente:\n");
-    write(1,"Datagram: ",30);
-    write(1,DataGramUDP,n);
     
+    for(int i = 0; i<sizeof(DataGramUDP); i){
+      printf(DataGramUDP[i]);
+
+    }
 
     //Funcion DNS QueryResponds
 
