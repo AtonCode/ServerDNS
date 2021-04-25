@@ -21,18 +21,47 @@ udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
 
-class Domines:
+def getQuestionDomain(data):
 
-    def __init__(self, name, queryRespond):
-        self.name = name
-        self.yequeryRespondar = queryRespond
+    state = 0
+    expectedlength = 0
+    domainstring = ''
+    domainparts = []
+    x = 0
+    y = 0
+    for byte in data:
+        if state == 1:
+            if byte != 0:
+                domainstring += chr(byte)
+            x += 1
+            if x == expectedlength:
+                domainparts.append(domainstring)
+                domainstring = ''
+                state = 0
+                x = 0
+            if byte == 0:
+                domainparts.append(domainstring)
+                break
+        else:
+            state = 1
+            expectedlength = byte
+        y += 1
+
+    questiontype = data[y:y+2]
+
+    return (domainparts, questiontype)
 
 # Guarda todas las peticiones DNS que se han enviado a foreingResolver
 def cacheWrite(queryRespondDNSFriend):
 
+    domainName, domineType = getQuestionDomain(queryRespondDNSFriend)
+
     try:
         flow = open('zones/cache.txt','a')
-        flow.write('www.aslbank.com\n')
+        flow.write(str(domainName))
+        flow.write('\n')
+        flow.writa(str(domineType))
+        flow.write('\n')
         flow.write(str(queryRespondDNSFriend))
         flow.write('\n')
         flow.close()
