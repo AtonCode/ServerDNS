@@ -58,16 +58,16 @@ def cacheWrite(queryRespondDNSFriend):
 
     try:
         flow = open('zones/cache.txt','a')
-        flow.write(str(domainName))
+        flow.write(str(domainName,'UTF-8'))
         flow.write('\n')
-        flow.write(str(domineType))
+        flow.write(str(domineType, 'UTF-8'))
         flow.write('\n')
         flow.write(str(queryRespondDNSFriend))
         flow.write('\n')
         flow.close()
 
     except FileNotFoundError:
-        print('Archivo no encontrado:', 'cache.txt')
+        print('Archivo no encontrado:')
         exit()
 
 
