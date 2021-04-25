@@ -7,7 +7,7 @@ Fecha de Entrega: 2/5/2021
 
 '''
 
-import socket, glob, json
+import socket, glob, json, codecs
 
 # Estandar DNS
 LocalHost = '127.0.0.1' #Local Host
@@ -58,9 +58,9 @@ def cacheWrite(queryRespondDNSFriend):
 
     try:
         flow = open('zones/cache.txt','a')
-        flow.write(decode(domainName,'UTF-8'))
+        flow.write(codecs.decode(domainName,'UTF-8'))
         flow.write('\n')
-        flow.write(decode(domineType, 'UTF-8'))
+        flow.write(codecs.decode(domineType, 'UTF-8'))
         flow.write('\n')
         flow.write(str(queryRespondDNSFriend))
         flow.write('\n')
