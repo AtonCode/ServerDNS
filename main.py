@@ -58,9 +58,9 @@ def cacheWrite(queryRespondDNSFriend):
 
     try:
         flow = open('zones/cache.txt','a')
-        flow.write(codecs.decode(domainName,'UTF-8'))
+        flow.write(str(codecs.decode(domainName,'UTF-8')))
         flow.write('\n')
-        flow.write(codecs.decode(domineType, 'UTF-8'))
+        flow.write(str(codecs.decode(domineType,'UTF-8')))
         flow.write('\n')
         flow.write(str(queryRespondDNSFriend))
         flow.write('\n')
