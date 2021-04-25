@@ -21,6 +21,26 @@ udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
 
+class Domines:
+
+    def __init__(self, name, queryRespond):
+        self.name = name
+        self.yequeryRespondar = queryRespond
+
+# Guarda todas las peticiones DNS que se han enviado a foreingResolver
+def cacheWrite(queryRespondDNSFriend):
+
+    try:
+        flow = open('zones/cache.txt','a')
+        flow.write('www.aslbank.com\n')
+        flow.write(str(queryRespondDNSFriend))
+        flow.write('\n')
+        flow.close()
+
+    except FileNotFoundError:
+        print('Archivo no encontrado:', 'cache.txt')
+        exit()
+
 
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
 def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
@@ -31,6 +51,9 @@ def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
 # Enviando datagrama del cliente a OpenDNS
     UDPSocket.sendto(dataGramFromFriendDNS, serverDNSAddressPort)
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
+
+# Guardando queryRespond en Cache.txt
+    cacheWrite(queryRespondDNSFriend)
 
 #Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
