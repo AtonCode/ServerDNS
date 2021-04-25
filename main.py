@@ -60,7 +60,7 @@ def cacheWrite(queryRespondDNSFriend):
         flow = open('zones/cache.txt','a')
         flow.write(str(domainName))
         flow.write('\n')
-        flow.writa(str(domineType))
+        flow.write(str(domineType))
         flow.write('\n')
         flow.write(str(queryRespondDNSFriend))
         flow.write('\n')
