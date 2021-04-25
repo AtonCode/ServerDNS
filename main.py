@@ -52,9 +52,9 @@ def getQuestionDomain(data):
     return (domainparts, questiontype)
 
 # Guarda todas las peticiones DNS que se han enviado a foreingResolver
-def cacheWrite(queryRespondDNSFriend):
+def cacheWrite(queryRespondDNSFriend, queryQuestion):
 
-    domainName, domineType = getQuestionDomain(queryRespondDNSFriend)
+    domainName, domineType = getQuestionDomain(queryQuestion)
 
     try:
         flow = open('zones/cache.txt','a')
@@ -82,7 +82,7 @@ def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
 
 # Guardando queryRespond en Cache.txt
-    cacheWrite(queryRespondDNSFriend)
+    cacheWrite(dataGramFromFriendDNS)
 
 #Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
