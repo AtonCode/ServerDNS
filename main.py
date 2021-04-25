@@ -82,7 +82,7 @@ def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
 
 # Guardando queryRespond en Cache.txt
-    cacheWrite(dataGramFromFriendDNS)
+    cacheWrite(queryRespondDNSFriend, dataGramFromFriendDNS)
 
 #Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
