@@ -15,7 +15,7 @@ import socket, glob, json, codecs
 LocalHost = '127.0.0.1' #Local Host
 OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
-SIZE = 512 # Mensajes UDP de 512 octetos or lee
+SIZE = 512 # Mensajes UDP de 512 octetos or lees
 serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
 
 # Creando y Configurando Servidor UDP
