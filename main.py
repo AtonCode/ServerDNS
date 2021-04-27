@@ -42,7 +42,7 @@ def hackFlags(flags):
     RCODE = '0000'
 
     # Uniendo las Partes que componen el flag y conviertiendolas a bytes
-    newFlags = (int(QR+Opcode+AA+TC+RD, 2).to_bytes(1, byteorder='big')) + (int(RA+Z+RCODE, 2).to_bytes(1, byteorder='big'))
+    newFlags = (int(QR+Opcode+AA+TC+RD, 2).to_bytes(1, 'big')) + (int(RA+Z+RCODE, 2).to_bytes(1, 'big'))
 
     return  newFlags
 
