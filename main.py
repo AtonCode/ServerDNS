@@ -22,6 +22,21 @@ serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
 udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
+# Cargar Zonas para respuesta Autoritativa del MasterFile
+def getZonasMasterFile():
+    jsonZona = {}
+    zonaFile = glob.glob('MasterFile/*.zona')
+    
+    for zona in zonaFile:
+        with open(zona) as zonaData:
+            data = json.load(zonaData)
+            zonaName = data["$origin"]
+            jsonZona[zonaName] = data
+
+    return jsonZona
+
+zoneData = getZonasMasterFile()
+
 # Edit Flags
 def hackFlags(flags):
 
