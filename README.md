@@ -15,6 +15,17 @@ _Luego accede a la carpeta serverDNS con el siguiente comando:_
 ```
 cd serverDNS
 ```
+_Luego ejecuta usando super usuario:_
+```
+sudo python3 main.py
+```
+Listo, ahora el servidor esta en espera de datos para procesar y responder.
+* Abre otra terminar ya sea en el mismo computador o uno en la red LAN
+_Ejeuta comando dig en el localhost si es el caso o la ip privada_
+```
+dig javeriana.edu.co @localhost
+```
+Fin..
 
 ## License
 [GPL v3](https://choosealicense.com/licenses/gpl-3.0/)

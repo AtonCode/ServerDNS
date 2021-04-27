@@ -20,36 +20,45 @@ serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
 udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
+# Edit Flags
+def hackFlags(flags):
 
-def getQuestionDomain(data):
+    # Byte Uno
+    byteUNO = byte(flags[:1])
+    QR = '1'
+    Opcode = ''
+    AA = '1' # Respuesta Autoritativa
+    TC = '0'
+    RD = '0'
 
-    state = 0
-    expectedlength = 0
-    domainstring = ''
-    domainparts = []
-    x = 0
-    y = 0
-    for byte in data:
-        if state == 1:
-            if byte != 0:
-                domainstring += chr(byte)
-            x += 1
-            if x == expectedlength:
-                domainparts.append(domainstring)
-                domainstring = ''
-                state = 0
-                x = 0
-            if byte == 0:
-                domainparts.append(domainstring)
-                break
-        else:
-            state = 1
-            expectedlength = byte
-        y += 1
+    for bit in range(1,5):
+        Opcode += str(ord((byteUNO)&(1<<bit)))
 
-    questiontype = data[y:y+2]
 
-    return (domainparts, questiontype)
+    # Byte Dos
+    byteDOS = byte(flags[1:2])
+    RA = '0'
+    Z = '000'
+    RCODE = '0000'
+
+    # Uniendo las Partes que componen el flag y conviertiendolas a bytes
+    newFlags = (int(QR+Opcode+AA+TC+RD, 2).to_bytes(1, byteorder='big')) + (int(RA+Z+RCODE, 2).to_bytes(1, byteorder='big'))
+
+    return  newFlags
+
+
+
+# Domain Name System Query
+def makeQueryRespondDNS(dataGram):
+
+    TansactionID = dataGram[:2]
+    TransactionIDHex = ''
+    for byte in TansactionID:
+        TransactionIDHex += hex(byte)[:2]
+
+    Flags = hackFlags(dataGram[2:4])
+
+
 
 # Guarda todas las peticiones DNS que se han enviado a foreingResolver
 def cacheWrite(queryRespondDNSFriend, queryQuestion):
@@ -74,17 +83,17 @@ def cacheWrite(queryRespondDNSFriend, queryQuestion):
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
 def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     
-# Creando Nuevo UDP Socket
+    # Creando Nuevo UDP Socket
     UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-# Enviando datagrama del cliente a OpenDNS
+    # Enviando datagrama del cliente a OpenDNS
     UDPSocket.sendto(dataGramFromFriendDNS, serverDNSAddressPort)
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
 
-# Guardando queryRespond en Cache.txt
-    cacheWrite(queryRespondDNSFriend, dataGramFromFriendDNS)
+    # Guardando queryRespond en Cache.txt
+    #cacheWrite(queryRespondDNSFriend, dataGramFromFriendDNS)
 
-#Retornando Datagrama de OpenDNS    
+    #Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
 
 
