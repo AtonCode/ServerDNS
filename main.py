@@ -1,8 +1,10 @@
 '''
-Licencia GPL v3
+Bajo Licencia GPL v3
 Autores: Alejandro Sacristan Leal & Camilo Jose Narvaez Montenegro & Loui Gerald Quintero & Juan Pablo Urrego
 Materia: Comunicación y Redes
-Desarrollo: Servidor DNS
+Universidad: Pontificia Universidad Javeriana de Bogotá Colombia
+Semestre: 2021-10
+Desarrollo: Servidor DNS con MasterFile solo tipo A  y Foreing Resolver
 Fecha de Entrega: 2/5/2021
 
 '''
