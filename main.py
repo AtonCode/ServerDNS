@@ -23,25 +23,30 @@ udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udpServerSocket.bind((LocalHost, DNSPort))
 
 # Cargar Zonas para respuesta Autoritativa del MasterFile
-def getZonasMasterFile():
+def getMasterFile():
     jsonZona = {}
     zonaFile = glob.glob('MasterFile/*.zona')
     
     for zona in zonaFile:
-        with open(zona) as zonaData:
-            data = json.load(zonaData)
+        with open(zona) as MaterFileData:
+            data = json.load(MaterFileData)
             zonaName = data["$origin"]
             jsonZona[zonaName] = data
 
     return jsonZona
 
-zoneData = getZonasMasterFile()
+MaterFileData = getMasterFile()
+
+def searchDomineMasterFiles(domainName):
+    global MaterFileData
+    zonaName = '.'.join(domainName)
+    return MaterFileData[zonaName]
 
 # Edit Flags
 def hackFlags(flags):
 
     # Byte Uno
-    byteUNO = byte(flags[:1])
+    byteUNO = bytes(flags[:1])
     QR = '1'
     Opcode = ''
     AA = '1' # Respuesta Autoritativa
@@ -49,11 +54,11 @@ def hackFlags(flags):
     RD = '0'
 
     for bit in range(1,5):
-        Opcode += str(ord((byteUNO)&(1<<bit)))
+        Opcode += str(ord(byteUNO)&(1<<bit))
 
 
     # Byte Dos
-    byteDOS = byte(flags[1:2])
+    byteDOS = bytes(flags[1:2])
     RA = '0'
     Z = '000'
     RCODE = '0000'
@@ -63,7 +68,78 @@ def hackFlags(flags):
 
     return  newFlags
 
+def dsnQuestionToBytes(domainName, tipo):
+    dsnQuestionInBytes = b''
 
+    for part in domainName:
+        lenght = len (part)
+        dsnQuestionInBytes += bytes([lenght])
+
+        for char in part:
+            dsnQuestionInBytes += ord(char).to_bytes(1, 'big')
+    if tipo == 'a':
+        dsnQuestionInBytes += (1).to_bytes(2,'big')
+    dsnQuestionInBytes += (1).to_bytes(2,'big')
+
+    return dsnQuestionInBytes
+
+
+
+# Query section
+def queryQuestionDomain(dataGram):
+
+    aux = 0
+    auxTwo = 0
+    flag = 0
+    dataLeng = 0
+    domainNameChar = ''
+    domainName = []
+
+    for byte in dataGram:
+        if flag == 1:
+            if byte != 0:
+                domainNameChar += chr(byte)
+            aux +=1
+            if aux == dataLeng:
+                domainName.append(domainNameChar)
+                domainNameChar = ''
+                flag = 0
+                aux = 0
+            if byte == 0:
+                domainName.append(domainNameChar)
+                break
+        else:
+            flag = 1
+            dataLeng = byte
+        
+        auxTwo += 1
+    questionType = dataGram[auxTwo:auxTwo+2]
+
+
+    return (domainName, questionType)
+
+
+def searchTypeADominesMasterFiles(dataGram):
+    domainName, questionType = queryQuestionDomain(dataGram)
+    questionTypeChar = ''
+    if questionType == b'\x00\x01':
+        questionTypeChar = 'a'
+
+    zona = searchDomineMasterFiles(domainName)
+
+    return (zona[questionTypeChar], questionTypeChar, domainName)
+
+def rectobytes(domainname, rectype, recttl, recval):
+    rbytes = b'\xc0\x0c'
+    if rectype == 'a':
+        rbytes = rbytes + bytes([0]) + bytes([1])
+        rbytes = rbytes + bytes([0]) + bytes([1])
+        rbytes += int(recttl).to_bytes(4, byteorder='big')
+    if rectype == 'a':
+        rbytes = rbytes + bytes([0]) + bytes([4])
+        for part in recval.split('.'):
+            rbytes += bytes([int(part)])
+    return rbytes
 
 # Domain Name System Query
 def makeQueryRespondDNS(dataGram):
@@ -75,8 +151,25 @@ def makeQueryRespondDNS(dataGram):
 
     Flags = hackFlags(dataGram[2:4])
 
+    QDCOUNT = b'\x00\x01'
+    ANCOUNT = len(searchTypeADominesMasterFiles(dataGram[12:])[0]).to_bytes(2,'big')
+    NSCOUNT = (0).to_bytes(2, 'big')
+    ARCOUNT = (0).to_bytes(2, 'big')
 
+    DNSheader = TansactionID + Flags + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
+    
+    DNSbody = b''
+    zonaMasterfile, questionTypeChar, domainName = searchTypeADominesMasterFiles(dataGram[12:])
+    dsnQuestion = dsnQuestionToBytes(domainName, questionTypeChar)
 
+    for zona in zonaMasterfile:
+        DNSbody += rectobytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
+        
+    QueryRespond =  DNSheader + dsnQuestion + DNSbody
+
+    return QueryRespond
+
+    
 # Guarda todas las peticiones DNS que se han enviado a foreingResolver
 def cacheWrite(queryRespondDNSFriend, queryQuestion):
 
@@ -123,7 +216,8 @@ try:
         dataGram1, addrCliente = udpServerSocket.recvfrom(SIZE)
 
     # 2 Enviando Datagrama a OpenDns y Resiviendo la respuesta
-        queryRespond = foreingResolver(dataGram1, serverDNSAddressPort)
+        queryRespondForeginResolver = foreingResolver(dataGram1, serverDNSAddressPort)
+        autoritativeQueryRespond = makeQueryRespondDNS(dataGram1)
         
         print("Query Recibido Cliente ")
         print(addrCliente)
@@ -131,10 +225,11 @@ try:
         print(" ")
    
     # 3 Enviando el query Responds al mismo cliente
-        udpServerSocket.sendto(queryRespond, addrCliente)
+        #udpServerSocket.sendto(queryRespond, addrCliente)
+        udpServerSocket.sendto(autoritativeQueryRespond, addrCliente)
         print("Query Enviado Cliente ")
         print(addrCliente)
-        print(queryRespond)
+        print(autoritativeQueryRespond)
         print(" ")
         print("---------------------------")
         print("Esperando mas Datagramas...")
