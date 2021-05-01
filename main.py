@@ -1,5 +1,5 @@
 '''
-Bajo Licencia GPL v3
+Licencia GPL v3
 Autores: Alejandro Sacristan Leal & Camilo Jose Narvaez Montenegro & Loui Gerald Quintero & Juan Pablo Urrego
 Materia: Comunicación y Redes
 Universidad: Pontificia Universidad Javeriana de Bogotá Colombia
