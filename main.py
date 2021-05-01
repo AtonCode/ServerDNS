@@ -128,24 +128,23 @@ def searchTypeADominesMasterFiles(dataGram):
         questionTypeChar = 'a'
 
     zona = searchDomineMasterFiles(domainName)
-    if(zona[questionTypeChar] == " "):
-         errorNotZone = True
-    else:
-        errorNotZone = False
+    if(zona[questionTypeChar] != " "):
+         errorNotZone = False
+         print(zona[questionTypeChar]!= " ")
 
     return (zona[questionTypeChar], questionTypeChar, domainName)
 
-def rectobytes(domainname, rectype, recttl, recval):
-    rbytes = b'\xc0\x0c'
-    if rectype == 'a':
-        rbytes = rbytes + bytes([0]) + bytes([1])
-        rbytes = rbytes + bytes([0]) + bytes([1])
-        rbytes += int(recttl).to_bytes(4, byteorder='big')
-    if rectype == 'a':
-        rbytes = rbytes + bytes([0]) + bytes([4])
-        for part in recval.split('.'):
-            rbytes += bytes([int(part)])
-    return rbytes
+def convertDNSbodyTObytes(domainname, questionTypeChar, ttl, value):
+    DNSbody = b'\xc0\x0c'
+    if questionTypeChar == 'a':
+        DNSbody = DNSbody + bytes([0]) + bytes([1])
+        DNSbody = DNSbody + bytes([0]) + bytes([1])
+        DNSbody += int(ttl).to_bytes(4, byteorder='big')
+    if questionTypeChar == 'a':
+        DNSbody = DNSbody + bytes([0]) + bytes([4])
+        for part in value.split('.'):
+            DNSbody += bytes([int(part)])
+    return DNSbody
 
 # Domain Name System Query
 def makeQueryRespondDNS(dataGram):
@@ -170,7 +169,7 @@ def makeQueryRespondDNS(dataGram):
     dsnQuestion = dsnQuestionToBytes(domainName, questionTypeChar)
 
     for zona in zonaMasterfile:
-        DNSbody += rectobytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
+        DNSbody += convertDNSbodyTObytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
         
     QueryRespond =  DNSheader + dsnQuestion + DNSbody
     
@@ -214,10 +213,12 @@ def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     return queryRespondDNSFriend
 
 
-def DNS():
-    
+def foreginResolverDNS(dataGram1, addrCliente):
+    # 3 Enviando Datagrama a OpenDns y Resiviendo la respuesta
+        queryRespondForeginResolver = foreingResolver(dataGram1, serverDNSAddressPort)
+        udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
 
-    return dataGram1, addrCliente
+        return queryRespondForeginResolver
     
 # Servidor DNS
 try:
@@ -230,32 +231,27 @@ try:
         print(addrCliente)
         print(dataGram1)
         print(" ")
-
-    # 2 Enviando Datagrama a OpenDns y Resiviendo la respuesta
-        autoritativeQueryRespond = makeQueryRespondDNS(dataGram1)
         
-    # 3 Enviando el query Responds al mismo cliente
-        udpServerSocket.sendto(autoritativeQueryRespond, addrCliente)
-        print("Query Enviado Cliente ")
-        print(addrCliente)
-        print(autoritativeQueryRespond)
-        print(" ")
-        print("---------------------------")
-        print("Esperando mas Datagramas...")
-        print("---------------------------")
-        print(":)")
-        print(" ")
-    
-except KeyError:
-    # 3 Enviando Datagrama a OpenDns y Resiviendo la respuesta
-    while True:
-        dataGram1, addrCliente = udpServerSocket.recvfrom(SIZE)
-        queryRespondForeginResolver = foreingResolver(dataGram1, serverDNSAddressPort)
-        udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
+    # 2 Buscando en el Master File y creando el query Response
+        autoritativeQueryRespond = makeQueryRespondDNS(dataGram1)
 
-        print("Query Enviado Cliente ")
-        print(addrCliente)
-        print(queryRespondForeginResolver)
+
+        if errorNotZone == False:
+        # 3 Enviando el query Responds al mismo cliente
+            udpServerSocket.sendto(autoritativeQueryRespond, addrCliente)
+            print("Query Enviado Cliente desde MasterFile ")
+            print(addrCliente)
+            print(autoritativeQueryRespond)
+
+        if errorNotZone != False:
+        # 3.1 Enviando Datagrama a OpenDns y retornando queryRespond
+            queryRespondForeginResolver = foreginResolverDNS(dataGram1, addrCliente)
+            print("Query Enviado Cliente desde ForeginResolver ")
+            print(addrCliente)
+            print(queryRespondForeginResolver)
+        
+        
+        
         print(" ")
         print("---------------------------")
         print("Esperando mas Datagramas...")
@@ -263,6 +259,8 @@ except KeyError:
         print(":)")
         print(" ")
 
+        
+        
     
 except KeyboardInterrupt:
     udpServerSocket.close()
