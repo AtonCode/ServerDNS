@@ -9,14 +9,14 @@ Fecha de Entrega: 2/5/2021
 
 '''
 
-import socket, glob, json, codecs
+import socket, glob, json
 
 # Estandar DNS
 LocalHost = '127.0.0.1' #Local Host
 OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
 SIZE = 512 # Mensajes UDP de 512 octetos or lees
-serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
+foreingResolverAddress = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
 
 
 # Creando y Configurando Servidor UDP
@@ -196,6 +196,7 @@ def makeQueryRespondDNS(dataGram):
             DNSbody += convertDNSbodyTObytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
         
         QueryRespond =  DNSheader + dsnQuestion + DNSbody
+    
     else:
         QueryRespond  = False
 
@@ -224,29 +225,18 @@ def cacheWrite(queryRespondDNSFriend, queryQuestion):
 
 
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
-def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
+def foreingResolver(dataGramFromFriendDNS):
     
     # Creando Nuevo UDP Socket
     UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # Enviando datagrama del cliente a OpenDNS
-    UDPSocket.sendto(dataGramFromFriendDNS, serverDNSAddressPort)
+    UDPSocket.sendto(dataGramFromFriendDNS, foreingResolverAddress)
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
-
-    # Guardando queryRespond en Cache.txt
-    #cacheWrite(queryRespondDNSFriend, dataGramFromFriendDNS)
 
     #Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
 
-
-def foreginResolverDNS(dataGram1, addrCliente):
-    # 3 Enviando Datagrama a OpenDns y Resiviendo la respuesta
-        queryRespondForeginResolver = foreingResolver(dataGram1, serverDNSAddressPort)
-        udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
-
-        return queryRespondForeginResolver
-    
 # Servidor DNS
 try:
     
@@ -274,7 +264,8 @@ try:
 
         else:
         # 3.1 Enviando Datagrama a OpenDns y retornando queryRespond
-            queryRespondForeginResolver = foreginResolverDNS(dataGram1, addrCliente)
+            queryRespondForeginResolver = foreingResolver(dataGram1)
+            udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
             print("Query Enviado Cliente desde ForeginResolver ")
             print(addrCliente)
             print(queryRespondForeginResolver)
