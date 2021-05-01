@@ -17,7 +17,7 @@ OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
 SIZE = 512 # Mensajes UDP de 512 octetos or lees
 serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
-errorNotZone = False
+
 
 # Creando y Configurando Servidor UDP
 udpServerSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -39,9 +39,15 @@ def getMasterFile():
 MaterFileData = getMasterFile()
 
 def searchDomineMasterFiles(domainName):
-    global MaterFileData
-    zonaName = '.'.join(domainName)
-    return MaterFileData[zonaName]
+    try:
+
+        global MaterFileData
+        zonaName = '.'.join(domainName)
+        return MaterFileData[zonaName]
+
+    except KeyError:
+        return False
+
 
 # Edit Flags
 def hackFlags(flags):
@@ -128,11 +134,24 @@ def searchTypeADominesMasterFiles(dataGram):
         questionTypeChar = 'a'
 
     zona = searchDomineMasterFiles(domainName)
-    if(zona[questionTypeChar] != " "):
-         errorNotZone = False
-         print(zona[questionTypeChar]!= " ")
 
     return (zona[questionTypeChar], questionTypeChar, domainName)
+
+def booleanFindZone(dataGram):
+
+    domainName, questionType = queryQuestionDomain(dataGram[12:])
+    questionTypeChar = ''
+    if questionType == b'\x00\x01':
+        questionTypeChar = 'a'
+
+    zona = searchDomineMasterFiles(domainName)
+
+    if zona == False:
+        return True
+    else:
+        return False
+         
+    
 
 def convertDNSbodyTObytes(domainname, questionTypeChar, ttl, value):
     DNSbody = b'\xc0\x0c'
@@ -149,29 +168,37 @@ def convertDNSbodyTObytes(domainname, questionTypeChar, ttl, value):
 # Domain Name System Query
 def makeQueryRespondDNS(dataGram):
 
-    TansactionID = dataGram[:2]
-    TransactionIDHex = ''
-    for byte in TansactionID:
-        TransactionIDHex += hex(byte)[:2]
-
-    Flags = hackFlags(dataGram[2:4])
-
-    QDCOUNT = b'\x00\x01'
-    ANCOUNT = len(searchTypeADominesMasterFiles(dataGram[12:])[0]).to_bytes(2,'big')
-    NSCOUNT = (0).to_bytes(2, 'big')
-    ARCOUNT = (0).to_bytes(2, 'big')
-
-    DNSheader = TansactionID + Flags + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
-    
-    DNSbody = b''
-    zonaMasterfile, questionTypeChar, domainName = searchTypeADominesMasterFiles(dataGram[12:])
-    
-    dsnQuestion = dsnQuestionToBytes(domainName, questionTypeChar)
-
-    for zona in zonaMasterfile:
-        DNSbody += convertDNSbodyTObytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
+    errorNotFindZone = booleanFindZone(dataGram)
+    if errorNotFindZone == False:
         
-    QueryRespond =  DNSheader + dsnQuestion + DNSbody
+        TansactionID = dataGram[:2]
+        TransactionIDHex = ''
+        for byte in TansactionID:
+            TransactionIDHex += hex(byte)[:2]
+
+        Flags = hackFlags(dataGram[2:4])
+
+        QDCOUNT = b'\x00\x01'
+
+        ANCOUNT = len(searchTypeADominesMasterFiles(dataGram[12:])[0]).to_bytes(2,'big')
+    
+        NSCOUNT = (0).to_bytes(2, 'big')
+        ARCOUNT = (0).to_bytes(2, 'big')
+
+        DNSheader = TansactionID + Flags + QDCOUNT + ANCOUNT + NSCOUNT + ARCOUNT
+    
+        DNSbody = b''
+        zonaMasterfile, questionTypeChar, domainName = searchTypeADominesMasterFiles(dataGram[12:])
+    
+        dsnQuestion = dsnQuestionToBytes(domainName, questionTypeChar)
+
+        for zona in zonaMasterfile:
+            DNSbody += convertDNSbodyTObytes(domainName, questionTypeChar, zona["ttl"], zona["value"])
+        
+        QueryRespond =  DNSheader + dsnQuestion + DNSbody
+    else:
+        QueryRespond  = False
+
     
     return QueryRespond
 
@@ -234,16 +261,18 @@ try:
         
     # 2 Buscando en el Master File y creando el query Response
         autoritativeQueryRespond = makeQueryRespondDNS(dataGram1)
+        errorNotFindZone = booleanFindZone(dataGram1)
+        print(errorNotFindZone)
 
 
-        if errorNotZone == False:
+        if errorNotFindZone == False:
         # 3 Enviando el query Responds al mismo cliente
             udpServerSocket.sendto(autoritativeQueryRespond, addrCliente)
             print("Query Enviado Cliente desde MasterFile ")
             print(addrCliente)
             print(autoritativeQueryRespond)
 
-        if errorNotZone != False:
+        else:
         # 3.1 Enviando Datagrama a OpenDns y retornando queryRespond
             queryRespondForeginResolver = foreginResolverDNS(dataGram1, addrCliente)
             print("Query Enviado Cliente desde ForeginResolver ")
