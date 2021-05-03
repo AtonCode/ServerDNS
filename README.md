@@ -6,6 +6,7 @@ Desarrollarlo en C/C++ sobre GNU/Linux.
 * Se requiere únicamente la conversión de nombres a direcciones IP sobre el protocolo de transporte UDP.
 * El servidor debe estar en capacidad de responder simultáneamente a múltiples solicitudes DNS por parte de los clientes.
 * El servidor DNS debe poder resibir Query y Responder con un Query Response.
+* El servidor DNS responde peticones de resolucion de nombres tipo A desde el Master File y si no se encuentran las envia a un Foreging Resolver y debuelve la respuesta el cliente que la solicito.
 
 ## Instalación en GNU/Linux
 
