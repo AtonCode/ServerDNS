@@ -225,16 +225,21 @@ def cacheWrite(queryRespondDNSFriend, queryQuestion):
 
 
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
-def foreingResolver(dataGramFromFriendDNS):
+def foreingResolver(dataGramFromFriendDNS,addrCliente):
     
     # Creando Nuevo UDP Socket
     UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     # Enviando datagrama del cliente a OpenDNS
     UDPSocket.sendto(dataGramFromFriendDNS, foreingResolverAddress)
+
+    # Resibiendo QueryRespond del OpenDNS
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
 
-    #Retornando Datagrama de OpenDNS    
+    # Enviando datagrama del cliente a OpenDNS
+    udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
+
+    # Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
 
 # Servidor DNS
@@ -250,8 +255,7 @@ try:
         print(dataGram1)
         print(" ")
         
-        queryRespondForeginResolver = foreingResolver(dataGram1)
-        udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
+        queryRespondForeginResolver = foreingResolver(dataGram1, addrCliente)
         print("Query Enviado Cliente desde ForeginResolver ")
         print(addrCliente)
         print(queryRespondForeginResolver)
