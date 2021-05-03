@@ -11,7 +11,7 @@ Fecha de Entrega: 2/5/2021
 import socket, glob, json, codecs
 
 # Estandar DNS
-LocalHost = '127.0.0.1' #Local Host
+LocalHost = '192.168.13.102' #Local Host
 OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
 SIZE = 512 # Mensajes UDP de 512 octetos or lees
