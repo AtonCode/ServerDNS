@@ -12,7 +12,7 @@ Fecha de Entrega: 2/5/2021
 import socket, glob, json
 
 # Estandar DNS
-LocalHost = '192.168.13.107' #Local Host
+LocalHost = '192.168.13.107' # Local Host
 OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
 SIZE = 512 # Mensajes UDP de 512 octetos or lees
@@ -241,7 +241,7 @@ def foreingResolver(dataGramFromFriendDNS):
 try:
     
     while True:
-        print("Running...")
+        
 
     # 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
         dataGram1, addrCliente = udpServerSocket.recvfrom(SIZE)
@@ -279,6 +279,7 @@ try:
         print("---------------------------")
         print(":)")
         print(" ")
+        print("Running...")
 
         
         
