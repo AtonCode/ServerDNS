@@ -237,7 +237,7 @@ def foreingResolver(dataGramFromFriendDNS,addrCliente):
     queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
 
     # Enviando datagrama del cliente a OpenDNS
-    udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
+    UDPSocket.sendto(queryRespondForeginResolver, addrCliente)
 
     # Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
