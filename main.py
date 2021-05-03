@@ -16,7 +16,7 @@ LocalHost = '192.168.13.107' # Local Host
 OpenDNS = '208.67.220.220' # IP de OpenDNS
 DNSPort = 53 # Puerto DNS estandar
 SIZE = 512 # Mensajes UDP de 512 octetos or lees
-foreingResolverAddress = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
+serverDNSAddressPort = (OpenDNS, DNSPort) # Datos de Servidor DNS Amigo
 
 
 # Creando y Configurando Servidor UDP
@@ -225,16 +225,16 @@ def cacheWrite(queryRespondDNSFriend, queryQuestion):
 
 
 # Cliente UDP send queryAsk from original cliente to OpenDNS and return the queryResponds of OpenDNS
-def foreingResolver(dataGramFromFriendDNS):
+def foreingResolver(dataGramFromFriendDNS, serverDNSAddressPort):
     
-    # Creando Nuevo UDP Socket
+# Creando Nuevo UDP Socket
     UDPSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    # Enviando datagrama del cliente a OpenDNS
-    UDPSocket.sendto(dataGramFromFriendDNS, foreingResolverAddress)
-    queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(SIZE)
+# Enviando datagrama del cliente a OpenDNS
+    UDPSocket.sendto(dataGramFromFriendDNS, serverDNSAddressPort)
+    queryRespondDNSFriend, addrDNSfriend = UDPSocket.recvfrom(512)
 
-    #Retornando Datagrama de OpenDNS    
+#Retornando Datagrama de OpenDNS    
     return queryRespondDNSFriend
 
 # Servidor DNS
@@ -265,7 +265,7 @@ try:
 
         else:
         # 3.1 Enviando Datagrama a OpenDns y retornando queryRespond
-            queryRespondForeginResolver = foreingResolver(dataGram1)
+            queryRespondForeginResolver = foreingResolver(dataGram1, serverDNSAddressPort)
             udpServerSocket.sendto(queryRespondForeginResolver, addrCliente)
             print("Query Enviado Cliente desde ForeginResolver ")
             print(addrCliente)
