@@ -241,6 +241,7 @@ def foreingResolver(dataGramFromFriendDNS):
 try:
     
     while True:
+        print("Running...")
 
     # 1 Configurando Servidor UDP para la recepcion de datagramas UDP no mas de 512 octetos
         dataGram1, addrCliente = udpServerSocket.recvfrom(SIZE)
